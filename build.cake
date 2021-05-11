@@ -212,18 +212,38 @@ Task("CreateMSBuildFolder")
         "Microsoft.Build.Utilities.v12.0",
     };
 
+    // These dependencies are not included in the Microsoft.NET.Sdk package
+    // but are necessary for some build tasks.
     var msBuildDependencies = new []
     {
+        "Microsoft.Deployment.DotNet.Releases",
+        "Microsoft.NET.StringTools",
+        "Newtonsoft.Json",
+        "System.Threading.Tasks.Dataflow",
+        "System.Resources.Extensions"
+    };
+
+    // These dependencies are all copied from the Microsoft.NET.Sdk package since
+    // we are trying to model a particular SDK's build tools.
+    var msBuildSdkDependencies = new []
+    {
         "Microsoft.Bcl.AsyncInterfaces",
+        "NuGet.Common",
+        "NuGet.Configuration",
+        "NuGet.DependencyResolver.Core",
+        "NuGet.Frameworks",
+        "NuGet.LibraryModel",
+        "NuGet.Packaging",
+        "NuGet.ProjectModel",
+        "NuGet.Protocol",
+        "NuGet.Versioning",
         "System.Buffers",
         "System.Collections.Immutable",
         "System.Memory",
         "System.Numerics.Vectors",
-        "System.Resources.Extensions",
         "System.Runtime.CompilerServices.Unsafe",
         "System.Text.Encodings.Web",
         "System.Text.Json",
-        "System.Threading.Tasks.Dataflow",
         "System.Threading.Tasks.Extensions",
     };
 
@@ -351,6 +371,20 @@ Task("CreateMSBuildFolder")
         }
     }
 
+    Information("Copying MSBuild SDK dependencies...");
+
+    var sdkToolsSourceFolder = CombinePaths(env.Folders.Tools, "Microsoft.NET.Sdk", "tools", "net472");
+    foreach (var dependency in msBuildSdkDependencies)
+    {
+        var dependencyFileName = dependency + ".dll";
+        var dependencySourcePath = CombinePaths(sdkToolsSourceFolder, dependencyFileName);
+        var dependencyTargetPath = CombinePaths(msbuildCurrentBinTargetFolder, dependencyFileName);
+        if (FileHelper.Exists(dependencySourcePath))
+        {
+            FileHelper.Copy(dependencySourcePath, dependencyTargetPath);
+        }
+    }
+
     // Copy MSBuild SDK Resolver and DotNetHostResolver
     Information("Copying MSBuild SDK resolver...");
     var msbuildSdkResolverSourceFolder = CombinePaths(env.Folders.Tools, "Microsoft.DotNet.MSBuildSdkResolver", "lib", "net5.0");
@@ -359,6 +393,12 @@ Task("CreateMSBuildFolder")
     FileHelper.Copy(
         source: CombinePaths(msbuildSdkResolverSourceFolder, "Microsoft.DotNet.MSBuildSdkResolver.dll"),
         destination: CombinePaths(msbuildSdkResolverTargetFolder, "Microsoft.DotNet.MSBuildSdkResolver.dll"));
+
+    // Add sentinel file to enable workload resolver
+    FileHelper.WriteAllLines(
+        path: CombinePaths(msbuildSdkResolverTargetFolder, "EnableWorkloadResolver.sentinel"),
+        contents: new string[0]
+    );
 
     if (Platform.Current.IsWindows)
     {
@@ -408,16 +448,7 @@ Task("CreateMSBuildFolder")
     var nugetPackages = new []
     {
         "NuGet.Commands",
-        "NuGet.Common",
-        "NuGet.Configuration",
-        "NuGet.Credentials",
-        "NuGet.DependencyResolver.Core",
-        "NuGet.Frameworks",
-        "NuGet.LibraryModel",
-        "NuGet.Packaging",
-        "NuGet.ProjectModel",
-        "NuGet.Protocol",
-        "NuGet.Versioning"
+        "NuGet.Credentials"
     };
 
     foreach (var nugetPackage in nugetPackages)
@@ -428,11 +459,6 @@ Task("CreateMSBuildFolder")
             source: CombinePaths(env.Folders.Tools, nugetPackage, "lib", "netstandard2.0", binaryName),
             destination: CombinePaths(msbuildCurrentBinTargetFolder, binaryName));
     }
-
-    // Copy additional dependency of Microsoft.Build.NuGetSdkResolver
-    FileHelper.Copy(
-        source: CombinePaths(env.Folders.Tools, "Newtonsoft.Json", "lib", "netstandard2.0", "Newtonsoft.Json.dll"),
-        destination: CombinePaths(msbuildCurrentBinTargetFolder, "Newtonsoft.Json.dll"));
 
     // Copy content of Microsoft.Net.Compilers.Toolset
     Information("Copying Microsoft.Net.Compilers.Toolset...");

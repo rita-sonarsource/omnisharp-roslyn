@@ -5,17 +5,18 @@
         <AspNetCorePackageVersion>2.1.1</AspNetCorePackageVersion>
         <MicrosoftExtensionPackageVersion>3.1.12</MicrosoftExtensionPackageVersion>
         <MSBuildPackageVersion>16.9.0</MSBuildPackageVersion>
-        <NuGetPackageVersion>5.9.0</NuGetPackageVersion>
-        <RoslynPackageVersion>3.10.0-1.21125.6</RoslynPackageVersion>
+        <NuGetPackageVersion>5.9.1</NuGetPackageVersion>
+        <RoslynPackageVersion>3.10.0-3.21222.20</RoslynPackageVersion>
         <XunitPackageVersion>2.4.1</XunitPackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Update="Cake.Scripting.Transport" Version="0.3.0" />
+        <PackageReference Update="Cake.Scripting.Transport" Version="0.6.4" />
 
-        <PackageReference Update="Dotnet.Script.DependencyModel" Version="1.0.2" />
-        <PackageReference Update="Dotnet.Script.DependencyModel.NuGet" Version="1.0.1" />
-        <PackageReference Update="ICSharpCode.Decompiler" Version="6.1.0.5902" />
+        <PackageReference Update="Dotnet.Script.DependencyModel" Version="1.1.0" />
+        <PackageReference Update="Dotnet.Script.DependencyModel.NuGet" Version="1.1.0" />
+        <PackageReference Update="ICSharpCode.Decompiler" Version="7.0.0.6488" />
+
         <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.2.4" />
 
         <PackageReference Update="Microsoft.AspNetCore.Diagnostics" Version="$(AspNetCorePackageVersion)" />
