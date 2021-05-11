@@ -341,7 +341,10 @@ Task("CreateMSBuildFolder")
 
         if (!TryCopyFromFramework("netcoreapp2.1"))
         {
-            _ = TryCopyFromFramework("netstandard2.0");
+           if (!TryCopyFromFramework("netstandard2.0")) 
+           {
+               _ = TryCopyFromFramework("net5.0");
+           }
         }
 
         bool TryCopyFromFramework(string frameworkVersion)
@@ -387,7 +390,7 @@ Task("CreateMSBuildFolder")
 
     // Copy MSBuild SDK Resolver and DotNetHostResolver
     Information("Copying MSBuild SDK resolver...");
-    var msbuildSdkResolverSourceFolder = CombinePaths(env.Folders.Tools, "Microsoft.DotNet.MSBuildSdkResolver", "lib", "net5.0");
+    var msbuildSdkResolverSourceFolder = CombinePaths(env.Folders.Tools, "Microsoft.DotNet.MSBuildSdkResolver", "lib", "net6.0");
     var msbuildSdkResolverTargetFolder = CombinePaths(msbuildCurrentBinTargetFolder, "SdkResolvers", "Microsoft.DotNet.MSBuildSdkResolver");
     DirectoryHelper.ForceCreate(msbuildSdkResolverTargetFolder);
     FileHelper.Copy(
@@ -785,7 +788,7 @@ Task("PublishMonoBuilds")
     }
 });
 
-Task("PublishNet5Builds")
+Task("PublishNet50Builds")
     .IsDependentOn("Setup")
     .Does(() =>
 {
@@ -929,7 +932,7 @@ Task("PublishNuGet")
 Task("Publish")
     .IsDependentOn("Build")
     .IsDependentOn("PublishMonoBuilds")
-    .IsDependentOn("PublishNet5Builds")
+    .IsDependentOn("PublishNet50Builds")
     .IsDependentOn("PublishWindowsBuilds")
     .IsDependentOn("PublishNuGet");
 

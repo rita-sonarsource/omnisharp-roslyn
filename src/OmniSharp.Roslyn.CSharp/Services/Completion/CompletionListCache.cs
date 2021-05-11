@@ -95,3 +95,8 @@ namespace OmniSharp.Roslyn.CSharp.Services.Completion
         public record CacheEntry(long ResultId, Document Document, int Position, CompletionList CompletionList);
     }
 }
+
+namespace System.Runtime.CompilerServices
+{
+    internal sealed class IsExternalInit { }
+}
