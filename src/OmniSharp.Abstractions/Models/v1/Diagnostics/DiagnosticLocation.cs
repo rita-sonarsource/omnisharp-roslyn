@@ -7,6 +7,7 @@ namespace OmniSharp.Models.Diagnostics
         public string LogLevel { get; set; }
         public string Id { get; set; }
         public string[] Tags { get; set; }
+        public ILocation[] AdditionalLocations { get; set; }
 
         public override bool Equals(object obj)
         {

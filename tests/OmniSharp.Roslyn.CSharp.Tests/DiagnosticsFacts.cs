@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using OmniSharp.Models.Diagnostics;
 using TestUtility;
 using Xunit;
@@ -140,6 +139,45 @@ namespace OmniSharp.Roslyn.CSharp.Tests
                     .OfType<DiagnosticLocation>()
                     .Single(x => x.Id == "IDE0005")
                     .Tags);
+            }
+        }
+
+        [Fact]
+        public async Task WhenIssueContainsAdditionalLocations_ThenReturnAdditionalLocations()
+        {
+            using var host = GetHost(roslynAnalyzersEnabled: true);
+            host.AddFilesToWorkspace(new TestFile("additionallocations.cs", @"
+int M1()
+{
+   var v = x != null
+            ? x
+                : y;
+}"));
+
+            var quickFixResponse = await host.RequestCodeCheckAsync("additionallocations.cs");
+
+            var diagnostic = quickFixResponse
+                .QuickFixes
+                .OfType<DiagnosticLocation>()
+                .Single(x => x.Id == "IDE0029");
+
+            Assert.Equal(3, diagnostic.AdditionalLocations.Length);
+
+            AssertAdditionalLocation(3, 5, 11, 19, diagnostic.AdditionalLocations[0]);
+            AssertAdditionalLocation(3, 3, 11, 12, diagnostic.AdditionalLocations[1]);
+            AssertAdditionalLocation(5, 5, 18, 19, diagnostic.AdditionalLocations[2]);
+
+            void AssertAdditionalLocation(int line,
+                int endLine,
+                int column,
+                int endColumn,
+                ILocation additionalLocation)
+            {
+                Assert.Equal(line, additionalLocation.Line);
+                Assert.Equal(endLine, additionalLocation.EndLine);
+                Assert.Equal(column, additionalLocation.Column);
+                Assert.Equal(endColumn, additionalLocation.EndColumn);
+                Assert.Equal("additionallocations.cs", additionalLocation.FileName);
             }
         }
 
