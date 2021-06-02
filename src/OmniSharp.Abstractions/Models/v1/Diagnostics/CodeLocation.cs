@@ -9,6 +9,7 @@ namespace OmniSharp.Models.Diagnostics
         int Column { get; set; }
         int EndLine { get; set; }
         int EndColumn { get; set; }
+        string Text { get; set; }
     }
 
     public class CodeLocation : ILocation
@@ -22,6 +23,7 @@ namespace OmniSharp.Models.Diagnostics
         public int EndLine { get; set; }
         [JsonConverter(typeof(ZeroBasedIndexConverter))]
         public int EndColumn { get; set; }
+        public string Text { get; set; }
 
         protected bool Equals(CodeLocation other)
         {

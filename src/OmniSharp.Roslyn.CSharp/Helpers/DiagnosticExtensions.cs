@@ -30,11 +30,27 @@ namespace OmniSharp.Helpers
                     .Where(x => _tagFilter.Contains(x))
                     .ToArray(),
                 Id = diagnostic.Id,
-                AdditionalLocations = diagnostic.AdditionalLocations.Select(ToAdditionalLocation).ToArray()
+                AdditionalLocations = ToAdditionalLocations(diagnostic)
             };
         }
 
-        private static CodeLocation ToAdditionalLocation(Location location)
+        private static ILocation[] ToAdditionalLocations(Diagnostic diagnostic)
+        {
+            var additionalLocations = new List<ILocation>();
+
+            for (var i = 0; i < diagnostic.AdditionalLocations.Count; i++)
+            {
+                var location = diagnostic.AdditionalLocations[i];
+                var text = diagnostic.Properties.GetValueOrDefault(i.ToString());
+                var additionalLocation = ToAdditionalLocation(location, text);
+
+                additionalLocations.Add(additionalLocation);
+            }
+
+            return additionalLocations.ToArray();
+        }
+
+        private static CodeLocation ToAdditionalLocation(Location location, string text)
         {
             var span = location.GetMappedLineSpan();
 
@@ -44,7 +60,8 @@ namespace OmniSharp.Helpers
                 Line = span.StartLinePosition.Line,
                 Column = span.StartLinePosition.Character,
                 EndLine = span.EndLinePosition.Line,
-                EndColumn = span.EndLinePosition.Character
+                EndColumn = span.EndLinePosition.Character,
+                Text = text
             };
         }
 
