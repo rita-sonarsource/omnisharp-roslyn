@@ -15,6 +15,7 @@ namespace OmniSharp.Helpers
         internal static DiagnosticLocation ToDiagnosticLocation(this Diagnostic diagnostic)
         {
             var span = diagnostic.Location.GetMappedLineSpan();
+
             return new DiagnosticLocation
             {
                 FileName = span.Path,
@@ -28,7 +29,39 @@ namespace OmniSharp.Helpers
                     .Descriptor.CustomTags
                     .Where(x => _tagFilter.Contains(x))
                     .ToArray(),
-                Id = diagnostic.Id
+                Id = diagnostic.Id,
+                AdditionalLocations = ToAdditionalLocations(diagnostic)
+            };
+        }
+
+        private static ILocation[] ToAdditionalLocations(Diagnostic diagnostic)
+        {
+            var additionalLocations = new List<ILocation>();
+
+            for (var i = 0; i < diagnostic.AdditionalLocations.Count; i++)
+            {
+                var location = diagnostic.AdditionalLocations[i];
+                var text = diagnostic.Properties.GetValueOrDefault(i.ToString());
+                var additionalLocation = ToAdditionalLocation(location, text);
+
+                additionalLocations.Add(additionalLocation);
+            }
+
+            return additionalLocations.ToArray();
+        }
+
+        private static CodeLocation ToAdditionalLocation(Location location, string text)
+        {
+            var span = location.GetMappedLineSpan();
+
+            return new CodeLocation
+            {
+                FileName = span.Path,
+                Line = span.StartLinePosition.Line,
+                Column = span.StartLinePosition.Character,
+                EndLine = span.EndLinePosition.Line,
+                EndColumn = span.EndLinePosition.Character,
+                Text = text
             };
         }
 
